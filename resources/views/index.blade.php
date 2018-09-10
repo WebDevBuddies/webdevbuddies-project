@@ -11,7 +11,7 @@
 
     <body>
         <div id="wdb-app">
-            <example-component></example-component>
+            <router-view></router-view>
         </div>
     </body>
     <script src="/js/app.js"></script>
