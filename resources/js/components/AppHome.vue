@@ -9,10 +9,14 @@
                 <div class="collapse navbar-collapse" id="navbarText">
                     <ul class="navbar-nav ml-auto">
                         <li class="nav-item">
-                            <a href="#" class="nav-link">Register</a>
+                            <router-link :to="{ name: 'register' }">
+                                Register
+                            </router-link>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link">Login</a>
+                            <router-link :to="{ name: 'login' }">
+                                Login
+                            </router-link>
                         </li>
                     </ul>
                 </div>
@@ -57,6 +61,10 @@
             font-weight: bold;
             color: #fff;
             font-size: 1.1em;
+            margin-right: 1em;
+            &:hover {
+                text-decoration: none;
+            }
         }
     }
     section {
