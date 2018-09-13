@@ -14,10 +14,17 @@ use Faker\Generator as Faker;
 */
 
 $factory->define(App\User::class, function (Faker $faker) {
+    static $password = 'password42';
+    $titles = [ 'Designer', 'Front End', 'Back End' ];
+    $skill_levels = [ 'Beginner', 'Intermediate', 'Advanced' ];
+
     return [
         'name' => $faker->name,
+        'username' => $faker->username,
         'email' => $faker->unique()->safeEmail,
-        'password' => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', // secret
+        'password' => bcrypt($password) ?: $password = 'secret',
+        'title' => $titles[rand(0, count($titles) - 1)],
+        'skill_level' => $skill_levels[rand(0, count($skill_levels) - 1)],
         'remember_token' => str_random(10),
     ];
 });
