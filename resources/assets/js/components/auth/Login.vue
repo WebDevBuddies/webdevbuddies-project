@@ -80,7 +80,11 @@
 
                 axios.post('api/login', vm.loginDetails)
                 .then(function (response) {
-                    console.log(response);
+                    if(response.status === 200) {
+                        vm.$router.push(
+                            { name: 'dashboard' }
+                        );
+                    }
                 })
                 .catch(function (error) {
                     var errors = error.response
