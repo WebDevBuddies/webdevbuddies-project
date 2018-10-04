@@ -15,9 +15,13 @@
         "cross-env": "^5.1",
         "jquery": "^3.2",
         "laravel-mix": "^2.0",
-        "lodash": "^4.17.5",
+        "lodash": "^4.17.11",
         "popper.js": "^1.12",
         "vue": "^2.5.7",
-        "vue-router": "^3.0.1"
+        "vue-router": "^3.0.1",
+        "vuex-router-sync": "^5.0.0"
+    },
+    "dependencies": {
+        "vuex": "^3.0.1"
     }
 }
