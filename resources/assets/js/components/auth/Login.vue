@@ -1,57 +1,46 @@
 <template>
-    <div class="container">
-        <div class="row">
-            <div class="col-md-8 col-md-offset-2">
-                <div class="panel panel-default">
-                    <div class="panel-heading">Login</div>
-                    <div class="panel-body">
-                        <form class="form-horizontal" role="form">
+    <div class="vertical-center">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8 offset-md-2">
+                    <div class="card">
+                        <div class="card-header">Login</div>
+                        <div class="card-body">
 
-                            <div class="form-group" :class="{'has-error' : errorsEmail}">
-                                <label for="email" class="col-md-4 control-label">E-Mail Address</label>
-
-                                <div class="col-md-6">
-                                    <input id="email" type="email" class="form-control" name="email" v-model="loginDetails.email" required autofocus>
-
-                                    <span v-if="errorsEmail" class="help-block">
-                                        <strong>{{emailError}}</strong>
-                                    </span>
-                                </div>
+                            <div class="alert alert-danger" v-if="error">
+                                {{ error }}
                             </div>
 
-                            <div class="form-group" :class="{'has-error' : errorsPassword}">
-                                <label for="password" class="col-md-4 control-label">Password</label>
+                            <form id="login_form" role="form" @submit.prevent="onSubmit">
 
-                                <div class="col-md-6">
-                                    <input id="password" type="password" class="form-control" v-model="loginDetails.password" name="password" required>
-                                    <span v-if="errorsPassword" class="help-block">
-                                        <strong>{{passwordError}}</strong>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <div class="col-md-6 col-md-offset-4">
-                                    <div class="checkbox">
-                                        <label>
-                                            <input type="checkbox" v-model="loginDetails.remember"  name="remember" > Remember Me
-                                        </label>
+                                <div class="form-group" :class="{ 'has-error': errors.email }">
+                                    <label for="email" class="col-md-4 control-label">E-Mail Address</label>
+                                    <div class="col-md-12">
+                                        <input id="email" type="email" class="form-control" v-model.trim="form.email" required autofocus>
+                                        <div class="help-block" v-if="errors.email">
+                                            <div v-for="error in errors.email"><strong>{{ error }}</strong></div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="form-group">
-                                <div class="col-md-8 col-md-offset-4">
-                                    <button type="submit" @click.prevent="loginPost" class="btn btn-primary">
-                                        Login
-                                    </button>
-
-                                    <a class="btn btn-link" href="">
-                                        Forgot Your Password?
-                                    </a>
+                                <div class="form-group" :class="{ 'has-error': errors.password }">
+                                    <label for="password" class="col-md-4 control-label">Password</label>
+                                    <div class="col-md-12">
+                                        <input id="password" type="password" class="form-control" v-model.trim="form.password" required>
+                                        <div class="help-block" v-if="errors.password">
+                                            <div v-for="error in errors.password"><strong>{{ error }}</strong></div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </form>
+
+                                <div class="form-group">
+                                    <div class="col-md-8">
+                                        <button type="submit" class="btn btn-primary">Login</button>&nbsp;&nbsp;
+                                        <router-link :to="{ name: 'register' }">No account? Register here!</router-link>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -60,51 +49,43 @@
 </template>
 
 <script>
+    import { mapState, mapActions } from 'vuex'
     export default {
-        data() {
+        data () {
             return {
-                loginDetails: {
+                form: {
                     email: '',
                     password: '',
-                    remember: true
                 },
-                errorsEmail: false,
-                errorsPassword: false,
-                emailError: null,
-                passwordError: null
+                error: '',
+                errors: {},
             }
+        },
+        computed: {
+            ...mapState({
+                me: state => state.auth.me,
+            })
         },
         methods: {
-            loginPost() {
-                let vm = this;
-
-                axios.post('api/login', vm.loginDetails)
-                .then(function (response) {
-                    if(response.status === 200) {
-                        vm.$router.push(
-                            { name: 'dashboard' }
-                        );
-                    }
+            ...mapActions([
+                'login',
+                'addToastMessage',
+            ]),
+            onSubmit () {
+                this.errors = {}
+                this.login(this.form)
+                .then(() => {
+                    this.addToastMessage({
+                        text: 'You logged in!',
+                        type: 'success'
+                    })
+                    this.$router.push('/dashboard')
                 })
-                .catch(function (error) {
-                    var errors = error.response
-
-                    if(errors.statusText === 'Unprocessable Entity') {
-                        if(errors.data) {
-                            if(errors.data.email) {
-                                vm.errorsEmail = true
-                                vm.emailError = _.isArray(errors.data.email) ? errors.data.email[0]: errors.data.email
-                            }
-                            if(errors.data.password) {
-                                vm.errorsPassword = true
-                                vm.passwordError = _.isArray(errors.data.password) ? errors.data.password[0] : errors.data.password
-                            }
-                        }
-                    }
-                });
-            }
-        },
-        mounted() {
+                .catch((data) => {
+                    this.error = data.message
+                    this.errors = data.errors || {}
+                })
+            },
         }
     }
 </script>
