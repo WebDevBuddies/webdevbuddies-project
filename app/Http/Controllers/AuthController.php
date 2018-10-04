@@ -2,59 +2,106 @@
 
 namespace App\Http\Controllers;
 
-use Auth;
 use App\User;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
+use Lang;
+use Validator;
 
+/**
+* Class AuthController
+*
+* @package App\Http\Controllers
+* @resource Authentication
+*/
 class AuthController extends Controller
 {
-    public function register(Request $request)
-    {
-        $user = new User;
-        $user->email = $request->email;
-        $user->name = $request->name;
-        $user->password = bcrypt($request->password);
-        $user->save();
-        return response([
-            'status' => 'success',
-            'data' => $user
-        ], 200);
-    }
+    use AuthenticatesUsers;
+
+    /**
+    * Login
+    *
+    * Handle a login request to the application.
+    *
+    * @param  \Illuminate\Http\Request  $request
+    * @return \Illuminate\Contracts\Auth\Authenticatable|array
+    */
     public function login(Request $request)
     {
-        $credentials = $request->only('email', 'password');
-        if ( ! $token = Auth::attempt($credentials)) {
-            return response([
-                'status' => 'error',
-                'error' => 'invalid.credentials',
-                'msg' => 'Invalid Credentials.'
-            ], 400);
+        $this->validateLogin($request);
+
+        // If the class is using the ThrottlesLogins trait, we can automatically throttle
+        // the login attempts for this application. We'll key this by the username and
+        // the IP address of the client making these requests into this application.
+        if ($this->hasTooManyLoginAttempts($request)) {
+            $this->fireLockoutEvent($request);
+            $seconds = $this->limiter()->availableIn($this->throttleKey($request));
+
+            abort(429, Lang::get('auth.throttle', ['seconds' => $seconds]));
         }
-        return response([
-            'status' => 'success'
-        ])
-        ->header('Authorization', $token);
+
+        if ($this->attemptLogin($request)) {
+            $this->clearLoginAttempts($request);
+
+            /** @var User $user */
+            $user = $this->guard()->user();
+
+            return ['user' => $user, 'access_token' => $user->makeApiToken()];
+        }
+
+        // If the login attempt was unsuccessful we will increment the number of attempts
+        // to login and redirect the user back to the login form. Of course, when this
+        // user surpasses their maximum number of attempts they will get locked out.
+        $this->incrementLoginAttempts($request);
+
+        abort(401, Lang::get('auth.failed'));
     }
-    public function user(Request $request)
+
+    /**
+    * Registration
+    *
+    * Handle a registration request for the application.
+    *
+    * @param  \Illuminate\Http\Request $request
+    * @return array
+    */
+    public function register(Request $request)
     {
-        $user = User::find(Auth::user()->id);
-        return response([
-            'status' => 'success',
-            'data' => $user
+        $this->validator($request->all())->validate();
+
+        event(new Registered($user = $this->create($request->all())));
+
+        return ['user' => $user, 'access_token' => $user->makeApiToken()];
+    }
+
+    /**
+    * Get a validator for an incoming registration request.
+    *
+    * @param  array  $data
+    * @return \Illuminate\Contracts\Validation\Validator
+    */
+    protected function validator(array $data)
+    {
+        return Validator::make($data, [
+            'name' => 'required|max:255',
+            'email' => 'required|email|max:255|unique:users',
+            'password' => 'required|min:6|confirmed',
         ]);
     }
-    public function refresh()
+
+    /**
+    * Create a new user instance after a valid registration.
+    *
+    * @param  array  $data
+    * @return User
+    */
+    protected function create(array $data)
     {
-        return response([
-            'status' => 'success'
+        return User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => bcrypt($data['password']),
         ]);
-    }
-    public function logout()
-    {
-        Auth::invalidate();
-        return response([
-            'status' => 'success',
-            'msg' => 'Logged out Successfully.'
-        ], 200);
     }
 }
