@@ -21,6 +21,7 @@ class FakeUserSeeder extends Seeder
             'password' => bcrypt('admin'),
             'title' => 'Front End',
             'skill_level' => 'Advanced',
+            'role' => 'admin',
             'remember_token' => str_random(10)
         ]);
 
