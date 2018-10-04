@@ -48909,8 +48909,8 @@ router.beforeEach(function (to, from, next) {
         next('/login');
     } else if (to.matched.some(function (record) {
         return record.meta.requiresAdmin;
-    }) && (!__WEBPACK_IMPORTED_MODULE_1__vuex_store__["a" /* default */].state.auth.me || !includes(['admin', 'manager'], __WEBPACK_IMPORTED_MODULE_1__vuex_store__["a" /* default */].state.auth.me.role))) {
-        // if route required admin or manager role
+    }) && (!__WEBPACK_IMPORTED_MODULE_1__vuex_store__["a" /* default */].state.auth.me || !includes(['admin'], __WEBPACK_IMPORTED_MODULE_1__vuex_store__["a" /* default */].state.auth.me.role))) {
+        // if route required admin role
         next('/login');
     } else {
         next();
