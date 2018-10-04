@@ -11,6 +11,7 @@
 
     <body>
         <div id="wdb-app">
+            <wdb-toast position="nw"></wdb-toast>
             <router-view></router-view>
         </div>
     </body>
