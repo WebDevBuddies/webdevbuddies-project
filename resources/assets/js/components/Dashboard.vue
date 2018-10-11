@@ -2,9 +2,16 @@
     <div>
         <nav class="navbar navbar-dark bg-dark fixed-top flex-md-nowrap p-0 shadow">
             <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="/">WebDevBuddies</a>
-            <ul class="navbar-nav px-3">
-                <li class="nav-item text-nowrap">
-                    <a class="nav-link" href="#">Sign out</a>
+            <ul class="nav navbar-nav px-3" v-if="me">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                        {{ me.name }} <span class="caret"></span>
+                    </a>
+
+                    <ul class="dropdown-menu" role="menu">
+                        <router-link tag="li" to="/profile" active-class="active"><a>Profile</a></router-link>
+                        <router-link tag="li" to="/logout" active-class="active"><a>Logout</a></router-link>
+                    </ul>
                 </li>
             </ul>
         </nav>
@@ -17,19 +24,19 @@
                             <li class="nav-item">
                                 <a class="nav-link active" href="#">
                                     <span data-feather="home"></span>
-                                    Dashboard
+                                    Home
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="#">
                                     <span data-feather="file"></span>
-                                    Orders
+                                    Projects
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="#">
-                                    <span data-feather="shopping-cart"></span>
-                                    Products
+                                    <span data-feather="resources"></span>
+                                    Resources
                                 </a>
                             </li>
                         </ul>
@@ -47,19 +54,46 @@
 </template>
 
 <script>
-    export default {
-        methods: {
-            getUsers() {
-                let vm = this;
+    import { mapState, mapActions } from 'vuex'
 
-                axios.get('api/user')
-                .then(function (response) {
-                    console.log(response);
-                })
-                .catch(function (error) {
-                    console.log(error);
-                });
+    export default {
+        data () {
+            return {
+                //
             }
+        },
+        mounted () {
+            // this.loadDashboard()
+        },
+        computed: {
+            ...mapState({
+                me: state => state.auth.me,
+                // dashboard: state => state.general.dashboard,
+            }),
+        },
+        methods: {
+            ...mapActions([
+                // 'loadDashboard',
+                'storeProject',
+                'addToastMessage',
+            ]),
+            onSubmit (form) {
+                this.storeEntry(form)
+                .then(() => {
+                    // this.loadDashboard()
+                    this.addToastMessage({
+                        text: 'New project was added!',
+                        type: 'success'
+                    })
+                    // this.project = {
+                    //
+                    // }
+                    this.errors = {}
+                })
+                .catch((data) => {
+                    this.errors = data.errors || {}
+                })
+            },
         }
     }
 </script>
