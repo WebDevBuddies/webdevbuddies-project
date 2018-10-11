@@ -33,6 +33,13 @@
                                     </div>
                                 </div>
 
+                                <div class="form-check">
+                                    <div class="col-md-8">
+                                        <input type="checkbox" id="remember" class="form-check-input" name="remember">
+                                        <label class="form-check-label" for="remember">Remember</label><br /><br />
+                                    </div>
+                                </div>
+
                                 <div class="form-group">
                                     <div class="col-md-8">
                                         <button type="submit" class="btn btn-primary">Login</button>&nbsp;&nbsp;
